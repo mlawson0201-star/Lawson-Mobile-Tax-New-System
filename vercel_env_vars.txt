@@ -1,0 +1,26 @@
+# Core Application
+NEXTAUTH_SECRET=aac7c004287f9bcd0316c55480e7d91e990d0f696e19f4995ea1a5d7d2d8344b
+NEXTAUTH_URL=https://lawsonmobiletax.com
+
+# Database (using Vercel Postgres for production)
+DATABASE_URL=postgresql://username:password@localhost:5432/lawson_mobile_tax?schema=public
+
+# Email Service (using Resend - free tier available)
+RESEND_API_KEY=re_placeholder_key_here
+
+# SMS Service (Twilio - will need user to configure)
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=placeholder_auth_token
+TWILIO_PHONE_NUMBER=+1234567890
+
+# Stripe Payment Processing (test keys for now)
+STRIPE_PUBLISHABLE_KEY=pk_test_placeholder_key
+STRIPE_SECRET_KEY=sk_test_placeholder_key
+STRIPE_WEBHOOK_SECRET=b9b467790ec4ca4ba6a7ea7e010b7b2c839750506cc965d4317e067eeda4a837
+
+# Optional Services
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/placeholder
+GOOGLE_ANALYTICS_ID=G-PLACEHOLDER
+
+# Production Environment
+NODE_ENV=production
