@@ -1,0 +1,1114 @@
+
+'use client'
+
+import React, { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Progress } from '@/components/ui/progress'
+import { 
+  Building2, 
+  Calculator, 
+  Shield, 
+  Star, 
+  Users, 
+  FileText, 
+  Settings, 
+  ArrowRight, 
+  CheckCircle,
+  Award,
+  Phone,
+  Smartphone,
+  DollarSign,
+  Clock,
+  Target,
+  Zap,
+  Lock,
+  HeartHandshake,
+  TrendingUp,
+  PlayCircle,
+  MessageCircle,
+  BookOpen,
+  PiggyBank,
+  BadgeCheck,
+  Upload,
+  Eye,
+  MapPin,
+  Briefcase,
+  Calendar,
+  CreditCard,
+  FileCheck,
+  Sparkles,
+  Globe,
+  Timer,
+  ThumbsUp,
+  Flame,
+  Crown,
+  Rocket,
+
+  Gem,
+  Trophy,
+  Camera,
+  Mic,
+  Video,
+  Bot,
+  ChevronRight,
+  Plus,
+  Minus,
+  BarChart3,
+  PieChart,
+  LineChart,
+  Truck
+} from 'lucide-react'
+import { COMPANY_CONFIG } from '@/lib/constants'
+import { MobileOptimizedLayout } from '@/components/mobile-optimized-layout'
+import { LiveChatWidget } from '@/components/live-chat-widget'
+import { ExitIntentPopup, useExitIntent } from '@/components/exit-intent-popup'
+import { UrgencyBanner, ScarcityIndicators, SocialProofTicker } from '@/components/urgency-banner'
+import { CalendarBooking } from '@/components/calendar-booking'
+import { GoogleReviewsSection } from '@/components/google-reviews-section'
+import { ServicesShowcase } from '@/components/services-showcase'
+
+const AdvancedRefundEstimator = () => {
+  const [step, setStep] = useState(1)
+  const [formData, setFormData] = useState({
+    income: '',
+    filingStatus: 'single',
+    dependents: '',
+    homeowner: false,
+    businessOwner: false,
+    investments: false,
+    charitableDonations: '',
+    previousRefund: '',
+    taxSoftware: 'none'
+  })
+  const [estimatedRefund, setEstimatedRefund] = useState(0)
+  const [savingsComparedToDIY, setSavingsComparedToDIY] = useState(0)
+  const [isCalculating, setIsCalculating] = useState(false)
+  const [currentTestimonial, setCurrentTestimonial] = useState(0)
+
+  const testimonials = [
+    {
+      text: "I thought I was tech-savvy enough to do my own taxes. Boy was I wrong! These professionals found $4,200 more than TurboTax ever did.",
+      name: "Michael Chen",
+      title: "Software Engineer",
+      location: "Seattle, WA",
+      savings: 4200,
+      rating: 5
+    },
+    {
+      text: "Three kids, two jobs, rental property - my taxes were a nightmare. They made it simple and found deductions I never knew existed!",
+      name: "Sarah Martinez",
+      title: "Working Mom & Real Estate Investor",
+      location: "Austin, TX",
+      savings: 5100,
+      rating: 5
+    },
+    {
+      text: "As a small business owner, I was drowning in paperwork. They not only did my taxes but helped me save for next year too!",
+      name: "David Johnson",
+      title: "Restaurant Owner",
+      location: "Miami, FL",
+      savings: 7800,
+      rating: 5
+    }
+  ]
+
+  const steps = [
+    { title: "Basic Info", icon: Users, progress: 33 },
+    { title: "Tax Situation", icon: FileText, progress: 66 },
+    { title: "Your Results", icon: TrendingUp, progress: 100 }
+  ]
+
+  const calculateAdvancedRefund = async () => {
+    setIsCalculating(true)
+    
+    // Simulate sophisticated calculation
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    
+    const income = parseInt(formData.income) || 0
+    const dependents = parseInt(formData.dependents) || 0
+    const donations = parseInt(formData.charitableDonations) || 0
+    const previousRefund = parseInt(formData.previousRefund) || 0
+    
+    let baseRefund = 0
+    let professionalBonus = 0
+    
+    // Income-based calculation
+    if (income <= 30000) {
+      baseRefund = Math.min(income * 0.22, 5000)
+      professionalBonus = 1200
+    } else if (income <= 60000) {
+      baseRefund = Math.min(income * 0.18, 4500)
+      professionalBonus = 1800
+    } else if (income <= 100000) {
+      baseRefund = Math.min(income * 0.15, 4000)
+      professionalBonus = 2400
+    } else {
+      baseRefund = Math.min(income * 0.12, 3500)
+      professionalBonus = 3200
+    }
+    
+    // Dependent credits
+    const dependentCredit = dependents * 3000
+    
+    // Homeowner benefits
+    const homeownerBonus = formData.homeowner ? 1500 : 0
+    
+    // Business owner benefits
+    const businessBonus = formData.businessOwner ? income * 0.08 : 0
+    
+    // Investment benefits
+    const investmentBonus = formData.investments ? 800 : 0
+    
+    // Charitable deduction benefits
+    const charityBonus = donations * 0.25
+    
+    // Filing status multiplier
+    const statusMultiplier = formData.filingStatus === 'head_of_household' ? 1.2 : 
+                            formData.filingStatus === 'married_jointly' ? 1.15 : 1.0
+    
+    const totalRefund = Math.round(
+      (baseRefund + dependentCredit + homeownerBonus + businessBonus + investmentBonus + charityBonus + professionalBonus) * statusMultiplier
+    )
+    
+    const diyRefund = previousRefund || Math.round(totalRefund * 0.65)
+    const savings = totalRefund - diyRefund
+    
+    setEstimatedRefund(Math.max(0, totalRefund))
+    setSavingsComparedToDIY(Math.max(0, savings))
+    setIsCalculating(false)
+    setStep(3)
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTestimonial(prev => (prev + 1) % testimonials.length)
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <div className="ultra-premium-card neon-glow p-8 relative overflow-hidden">
+      {/* Particles Background */}
+      <div className="particles absolute inset-0 opacity-30"></div>
+      
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-3 mb-4">
+            <div className="w-16 h-16 ultra-button rounded-full flex items-center justify-center pulse-ring">
+              <Calculator className="h-8 w-8 text-white" />
+            </div>
+            <div className="text-left">
+              <h3 className="text-2xl font-bold premium-gradient-text">AI-Powered Refund Calculator</h3>
+              <p className="text-gray-600">Get your personalized maximum refund estimate</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-center gap-1 mb-4">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="h-5 w-5 text-yellow-400 fill-current floating" style={{animationDelay: `${i * 0.1}s`}} />
+            ))}
+            <span className="text-sm text-gray-600 ml-2 font-semibold">Used by 25,000+ taxpayers</span>
+          </div>
+
+          {/* Progress Steps */}
+          <div className="flex items-center justify-center gap-4 mb-8">
+            {steps.map((stepData, index) => (
+              <div key={index} className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 ${
+                step > index ? 'morphism text-white' : step === index + 1 ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'
+              }`}>
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                  step > index ? 'bg-green-500' : step === index + 1 ? 'bg-white text-primary' : 'bg-gray-300'
+                }`}>
+                  {step > index ? <CheckCircle className="h-4 w-4" /> : index + 1}
+                </div>
+                <span className="text-sm font-semibold">{stepData.title}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Step 1: Basic Information */}
+        {step === 1 && (
+          <div className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Annual Income</label>
+                <Input
+                  type="number"
+                  placeholder="e.g., 75,000"
+                  value={formData.income}
+                  onChange={(e) => setFormData({...formData, income: e.target.value})}
+                  className="h-14 text-lg text-center border-2 border-primary/30 focus:border-primary rounded-xl neon-glow"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Filing Status</label>
+                <select
+                  value={formData.filingStatus}
+                  onChange={(e) => setFormData({...formData, filingStatus: e.target.value})}
+                  className="w-full h-14 text-lg text-center border-2 border-primary/30 focus:border-primary rounded-xl neon-glow"
+                >
+                  <option value="single">Single</option>
+                  <option value="married_jointly">Married Filing Jointly</option>
+                  <option value="married_separately">Married Filing Separately</option>
+                  <option value="head_of_household">Head of Household</option>
+                </select>
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Number of Dependents</label>
+              <Input
+                type="number"
+                placeholder="e.g., 2"
+                value={formData.dependents}
+                onChange={(e) => setFormData({...formData, dependents: e.target.value})}
+                className="h-14 text-lg text-center border-2 border-primary/30 focus:border-primary rounded-xl neon-glow"
+              />
+            </div>
+            
+            <Button 
+              onClick={() => setStep(2)}
+              className="w-full h-16 ultra-button text-xl font-bold rounded-2xl"
+              disabled={!formData.income}
+            >
+              Continue to Tax Situation
+              <ArrowRight className="ml-2 h-6 w-6" />
+            </Button>
+          </div>
+        )}
+
+        {/* Step 2: Tax Situation */}
+        {step === 2 && (
+          <div className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Previous Year Refund (if any)</label>
+                <Input
+                  type="number"
+                  placeholder="e.g., 2,500"
+                  value={formData.previousRefund}
+                  onChange={(e) => setFormData({...formData, previousRefund: e.target.value})}
+                  className="h-14 text-lg text-center border-2 border-primary/30 focus:border-primary rounded-xl neon-glow"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Charitable Donations</label>
+                <Input
+                  type="number"
+                  placeholder="e.g., 500"
+                  value={formData.charitableDonations}
+                  onChange={(e) => setFormData({...formData, charitableDonations: e.target.value})}
+                  className="h-14 text-lg text-center border-2 border-primary/30 focus:border-primary rounded-xl neon-glow"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <p className="font-bold text-gray-700">Which applies to you? (Select all that apply)</p>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
+                  formData.homeowner ? 'border-primary bg-primary/10 morphism' : 'border-gray-200 hover:border-primary/50'
+                }`}
+                onClick={() => setFormData({...formData, homeowner: !formData.homeowner})}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      formData.homeowner ? 'bg-primary text-white' : 'bg-gray-200'
+                    }`}>
+                      <CheckCircle className="h-5 w-5" />
+                    </div>
+                    <span className="font-semibold">I own my home</span>
+                  </div>
+                </div>
+                
+                <div className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
+                  formData.businessOwner ? 'border-primary bg-primary/10 morphism' : 'border-gray-200 hover:border-primary/50'
+                }`}
+                onClick={() => setFormData({...formData, businessOwner: !formData.businessOwner})}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      formData.businessOwner ? 'bg-primary text-white' : 'bg-gray-200'
+                    }`}>
+                      <Briefcase className="h-5 w-5" />
+                    </div>
+                    <span className="font-semibold">I own a business</span>
+                  </div>
+                </div>
+                
+                <div className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
+                  formData.investments ? 'border-primary bg-primary/10 morphism' : 'border-gray-200 hover:border-primary/50'
+                }`}
+                onClick={() => setFormData({...formData, investments: !formData.investments})}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      formData.investments ? 'bg-primary text-white' : 'bg-gray-200'
+                    }`}>
+                      <TrendingUp className="h-5 w-5" />
+                    </div>
+                    <span className="font-semibold">I have investments</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-4">
+              <Button 
+                onClick={() => setStep(1)}
+                variant="outline"
+                className="flex-1 h-16 border-2 border-primary text-primary hover:bg-primary hover:text-white text-lg font-bold rounded-2xl"
+              >
+                <ArrowRight className="mr-2 h-6 w-6 rotate-180" />
+                Back
+              </Button>
+              <Button 
+                onClick={calculateAdvancedRefund}
+                className="flex-1 h-16 ultra-button text-xl font-bold rounded-2xl"
+              >
+                Calculate My Maximum Refund
+                <Sparkles className="ml-2 h-6 w-6" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Results */}
+        {step === 3 && (
+          <div className="text-center space-y-8">
+            {isCalculating ? (
+              <div className="py-12">
+                <div className="w-20 h-20 mx-auto mb-6 relative">
+                  <div className="w-full h-full ultra-button rounded-full flex items-center justify-center animate-spin">
+                    <Calculator className="h-10 w-10 text-white" />
+                  </div>
+                </div>
+                <h4 className="text-2xl font-bold text-gray-900 mb-2 typewriter">Analyzing Your Tax Situation...</h4>
+                <p className="text-gray-600">Our AI is finding every deduction and credit you deserve</p>
+              </div>
+            ) : (
+              <>
+                <div className="ultra-premium-card bg-gradient-to-br from-green-50 to-emerald-100 p-8 border-green-300">
+                  <div className="flex items-center justify-center mb-6">
+                    <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center pulse-ring">
+                      <Trophy className="h-10 w-10 text-white" />
+                    </div>
+                  </div>
+                  
+                  <h4 className="text-3xl font-bold text-green-800 mb-4 holographic">Your Maximum Refund Estimate</h4>
+                  <div className="text-6xl font-bold text-green-600 mb-4 premium-gradient-text">
+                    ${estimatedRefund.toLocaleString()}
+                  </div>
+                  
+                  {savingsComparedToDIY > 0 && (
+                    <div className="bg-yellow-100 border-2 border-yellow-300 rounded-2xl p-6 mb-6">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <Flame className="h-6 w-6 text-orange-500" />
+                        <span className="text-lg font-bold text-orange-800">Professional Advantage</span>
+                        <Flame className="h-6 w-6 text-orange-500" />
+                      </div>
+                      <div className="text-3xl font-bold text-orange-600 mb-2">
+                        +${savingsComparedToDIY.toLocaleString()}
+                      </div>
+                      <p className="text-sm text-orange-700">more than typical DIY software finds</p>
+                    </div>
+                  )}
+                  
+                  <div className="grid md:grid-cols-3 gap-4 mb-8">
+                    <div className="text-center p-4 bg-white/80 rounded-xl">
+                      <Shield className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                      <div className="font-bold text-gray-900">100% Accurate</div>
+                      <div className="text-sm text-gray-600">Guaranteed</div>
+                    </div>
+                    <div className="text-center p-4 bg-white/80 rounded-xl">
+                      <Clock className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                      <div className="font-bold text-gray-900">24hr Service</div>
+                      <div className="text-sm text-gray-600">Most Returns</div>
+                    </div>
+                    <div className="text-center p-4 bg-white/80 rounded-xl">
+                      <Award className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                      <div className="font-bold text-gray-900">Max Refund</div>
+                      <div className="text-sm text-gray-600">Guarantee</div>
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm text-green-600 mb-6">
+                    *Estimate based on information provided. Actual refund may vary. Professional review recommended.
+                  </p>
+                  
+                  <Link href="/auth/client/signin">
+                    <Button className="w-full h-16 ultra-button text-xl font-bold rounded-2xl">
+                      <Crown className="mr-2 h-6 w-6" />
+                      Claim My ${estimatedRefund.toLocaleString()} Refund Now
+                      <Rocket className="ml-2 h-6 w-6" />
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className="text-center">
+                  <Button 
+                    onClick={() => {setStep(1); setEstimatedRefund(0); setSavingsComparedToDIY(0)}}
+                    variant="outline"
+                    className="border-primary text-primary hover:bg-primary hover:text-white"
+                  >
+                    Calculate Another Estimate
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Rotating Testimonials */}
+        {step !== 3 && (
+          <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border border-blue-200">
+            <div className="text-center">
+              <div className="flex justify-center mb-4">
+                {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <blockquote className="text-lg italic text-gray-700 mb-4">
+                "{testimonials[currentTestimonial].text}"
+              </blockquote>
+              <div className="flex items-center justify-center gap-4">
+                <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold">
+                  {testimonials[currentTestimonial].name.split(' ').map(n => n[0]).join('')}
+                </div>
+                <div className="text-left">
+                  <p className="font-bold text-gray-900">{testimonials[currentTestimonial].name}</p>
+                  <p className="text-sm text-primary font-semibold">{testimonials[currentTestimonial].title}</p>
+                  <p className="text-xs text-gray-600">{testimonials[currentTestimonial].location}</p>
+                </div>
+              </div>
+              <div className="mt-3 inline-flex items-center gap-2 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold">
+                <TrendingUp className="h-4 w-4" />
+                Saved ${testimonials[currentTestimonial].savings.toLocaleString()} vs DIY
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+const AnimatedCounter = ({ value, prefix = '', suffix = '', duration = 2000 }: { value: number, prefix?: string, suffix?: string, duration?: number }) => {
+  const [count, setCount] = useState(0)
+  const [isVisible, setIsVisible] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isVisible) {
+          setIsVisible(true)
+        }
+      },
+      { threshold: 0.3 }
+    )
+
+    if (ref.current) {
+      observer.observe(ref.current)
+    }
+
+    return () => observer.disconnect()
+  }, [isVisible])
+
+  useEffect(() => {
+    if (!isVisible) return
+    
+    const steps = 60
+    const stepValue = value / steps
+    const stepDuration = duration / steps
+    
+    let current = 0
+    const timer = setInterval(() => {
+      current += stepValue
+      if (current >= value) {
+        setCount(value)
+        clearInterval(timer)
+      } else {
+        setCount(Math.floor(current))
+      }
+    }, stepDuration)
+
+    return () => clearInterval(timer)
+  }, [value, duration, isVisible])
+
+  return <span ref={ref}>{prefix}{count.toLocaleString()}{suffix}</span>
+}
+
+const ParallaxSection = ({ children, speed = 0.5 }: { children: React.ReactNode, speed?: number }) => {
+  const [offset, setOffset] = useState(0)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setOffset(window.pageYOffset * speed)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [speed])
+
+  return (
+    <div style={{ transform: `translateY(${offset}px)` }}>
+      {children}
+    </div>
+  )
+}
+
+export default function WelcomePage() {
+  const [currentFeature, setCurrentFeature] = useState(0)
+  const [currentTestimonial, setCurrentTestimonial] = useState(0)
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [showCalendarBooking, setShowCalendarBooking] = useState(false)
+  const { showExitIntent, setShowExitIntent } = useExitIntent()
+
+  const features = [
+    {
+      icon: Zap,
+      title: "AI-Powered Tax Intelligence",
+      description: "Our advanced AI scans your financial profile and automatically identifies every deduction, credit, and tax-saving opportunity—even ones human preparers might miss."
+    },
+    {
+      icon: Shield,
+      title: "Military-Grade Security & Privacy",
+      description: "Your sensitive tax data is protected with bank-level 256-bit encryption, multi-factor authentication, and zero-knowledge architecture. We never store what we don't need."
+    },
+    {
+      icon: Crown,
+      title: "Platinum-Level Tax Professionals",
+      description: "Our certified CPAs and Enrolled Agents average 15+ years of experience and undergo continuous training on the latest tax laws and optimization strategies."
+    },
+    {
+      icon: Rocket,
+      title: "Smart Mobile-First Experience",
+      description: "Snap photos of documents with AI recognition, e-sign from anywhere, real-time refund tracking, and push notifications—tax prep in your pocket."
+    },
+    {
+      icon: Gem,
+      title: "Quantum-Speed Processing",
+      description: "Most tax returns completed within 24 hours using our streamlined workflow and dedicated processing team. Express service available for urgent situations."
+    }
+  ]
+
+  const testimonials = [
+    {
+      name: "Dr. Sarah Chen",
+      location: "San Francisco, CA",
+      role: "Physician & Real Estate Investor",
+      content: "I have multiple income streams and complex investments. These professionals not only maximized my refund but helped me restructure for significant tax savings next year. Absolutely brilliant!",
+      rating: 5,
+      refundIncrease: 8750,
+      avatar: "SC",
+      verified: true
+    },
+    {
+      name: "Marcus Williams",
+      location: "Atlanta, GA",
+      role: "Tech Entrepreneur",
+      content: "Started my company mid-year and my taxes were a mess. They sorted everything out, found business deductions I didn't know existed, and saved me from a potential audit nightmare.",
+      rating: 5,
+      refundIncrease: 12500,
+      avatar: "MW",
+      verified: true
+    },
+    {
+      name: "Jennifer Lopez",
+      location: "Austin, TX",
+      role: "Single Mom & Nurse",
+      content: "With three kids and nursing school expenses, every dollar counts. They found $5,200 more than H&R Block and treated me like family throughout the process.",
+      rating: 5,
+      refundIncrease: 5200,
+      avatar: "JL",
+      verified: true
+    },
+    {
+      name: "Robert Kim",
+      location: "Denver, CO",
+      role: "Cryptocurrency Trader",
+      content: "Crypto taxes are complex and scary. These experts navigated all my transactions flawlessly and actually taught me strategies to minimize future tax liability. Worth every penny!",
+      rating: 5,
+      refundIncrease: 4850,
+      avatar: "RK",
+      verified: true
+    }
+  ]
+
+  const stats = [
+    { label: "Satisfied Clients", value: 27500, prefix: "", suffix: "+", icon: Users },
+    { label: "Average Refund Boost", value: 3247, prefix: "$", suffix: "", icon: TrendingUp },
+    { label: "Client Satisfaction", value: 99, prefix: "", suffix: "%", icon: Star },
+    { label: "Years Combined Experience", value: 147, prefix: "", suffix: "", icon: Award }
+  ]
+
+  const industries = [
+    { name: "Healthcare Professionals", icon: HeartHandshake, clients: "2,100+" },
+    { name: "Tech & IT Workers", icon: Smartphone, clients: "3,800+" },
+    { name: "Small Business Owners", icon: Building2, clients: "4,200+" },
+    { name: "Real Estate Investors", icon: MapPin, clients: "1,900+" },
+    { name: "Gig Economy Workers", icon: Truck, clients: "5,500+" },
+    { name: "Military & Veterans", icon: Shield, clients: "1,700+" }
+  ]
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentFeature((prev) => (prev + 1) % features.length)
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [features.length])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length)
+    }, 6000)
+    return () => clearInterval(interval)
+  }, [testimonials.length])
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY })
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [])
+
+  return (
+    <MobileOptimizedLayout showNavigation={false}>
+      {/* Urgency Banner */}
+      <UrgencyBanner />
+      
+      <div className="min-h-screen overflow-hidden pt-16">
+        {/* Ultra-Premium Hero Section */}
+        <section className="hero-gradient py-20 lg:py-32 relative">
+          {/* Cursor Following Glow */}
+          <div 
+            className="fixed w-96 h-96 rounded-full pointer-events-none z-10 opacity-20"
+            style={{
+              left: mousePosition.x - 192,
+              top: mousePosition.y - 192,
+              background: 'radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 70%)',
+              transition: 'all 0.1s ease'
+            }}
+          />
+          
+          <div className="container mx-auto px-4 relative z-20">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <ParallaxSection speed={0.3}>
+                <div className="space-y-8">
+                  {/* Live Activity Ticker */}
+                  <div className="flex items-center gap-4 text-sm">
+                    <div className="flex items-center gap-2 morphism text-white px-4 py-2 rounded-full">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      <span className="font-bold">LIVE: <AnimatedCounter value={89} /> returns filed in last hour</span>
+                    </div>
+                    <div className="morphism text-white px-4 py-2 rounded-full">
+                      <span className="font-bold flex items-center gap-1">
+                        <Star className="h-4 w-4 text-yellow-400" />
+                        4.9/5 rating (5,847 reviews)
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Trust Indicators with Animations */}
+                  <div className="flex flex-wrap gap-3">
+                    <div className="morphism text-white px-4 py-2 rounded-full hover-lift">
+                      <div className="flex items-center gap-2">
+                        <BadgeCheck className="h-4 w-4 text-green-400" />
+                        <span className="font-semibold">IRS Authorized e-file</span>
+                      </div>
+                    </div>
+                    <div className="morphism text-white px-4 py-2 rounded-full hover-lift">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-blue-400" />
+                        <span className="font-semibold">Military-Grade Security</span>
+                      </div>
+                    </div>
+                    <div className="morphism text-white px-4 py-2 rounded-full hover-lift">
+                      <div className="flex items-center gap-2">
+                        <Trophy className="h-4 w-4 text-yellow-400" />
+                        <span className="font-semibold">$3,247 Avg. Increase</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-6">
+                    <h1 className="text-5xl lg:text-8xl font-bold text-white leading-tight">
+                      <span className="text-glow">Stop Paying</span>
+                      <span className="block holographic">The Tax Man</span>
+                      <span className="text-white/90 text-3xl lg:text-5xl font-normal block mt-4">More Than You Owe</span>
+                    </h1>
+                    
+                    <p className="text-xl lg:text-2xl text-white/90 leading-relaxed max-w-2xl">
+                      Professional tax preparation isn't just about filing—it's about <strong className="text-yellow-300">financial optimization</strong>. 
+                      Our AI-powered platform and certified experts find an average of <strong className="text-green-300">$3,247 more</strong> than DIY software. 
+                      That's not just a refund, that's <strong className="premium-gradient-text">life-changing money</strong>.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-6">
+                    <Link href="/auth/client/signin">
+                      <Button className="ultra-button text-2xl px-12 py-8 rounded-2xl font-bold neon-glow">
+                        <Zap className="mr-3 h-8 w-8" />
+                        Unleash My Maximum Refund
+                        <Rocket className="ml-3 h-8 w-8" />
+                      </Button>
+                    </Link>
+                    
+                    <Button variant="outline" className="morphism text-white border-white/30 hover:bg-white/10 text-xl px-10 py-8 rounded-2xl font-bold">
+                      <Phone className="mr-2 h-6 w-6" />
+                      {COMPANY_CONFIG.contact.phone}
+                    </Button>
+                  </div>
+
+                  {/* Enhanced Guarantee Badges */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                    {[
+                      { icon: CheckCircle, title: "100% Accuracy", subtitle: "Guaranteed or Free" },
+                      { icon: Shield, title: "Audit Defense", subtitle: "Lifetime Protection" },
+                      { icon: Timer, title: "24hr Processing", subtitle: "Most Returns" },
+                      { icon: Crown, title: "VIP Treatment", subtitle: "White Glove Service" }
+                    ].map((item, index) => (
+                      <div key={index} className="text-center hover-lift">
+                        <div className="w-16 h-16 morphism rounded-full mx-auto mb-3 flex items-center justify-center pulse-ring">
+                          <item.icon className="h-8 w-8 text-white" />
+                        </div>
+                        <div className="font-bold text-white">{item.title}</div>
+                        <div className="text-white/70 text-xs">{item.subtitle}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </ParallaxSection>
+
+              {/* Enhanced Refund Estimator */}
+              <ParallaxSection speed={-0.2}>
+                <div className="lg:pl-8" id="refund-calculator">
+                  <AdvancedRefundEstimator />
+                </div>
+              </ParallaxSection>
+            </div>
+          </div>
+        </section>
+
+        {/* Animated Stats Section with Counter */}
+        <section className="py-20 bg-gradient-to-r from-gray-50 to-white relative overflow-hidden">
+          <div className="absolute inset-0">
+            <div className="absolute top-0 left-1/4 w-72 h-72 bg-blue-200 rounded-full opacity-20 floating"></div>
+            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-200 rounded-full opacity-20 floating" style={{animationDelay: '1s'}}></div>
+          </div>
+          
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl lg:text-6xl font-bold premium-gradient-text mb-4">
+                The Numbers Don't Lie
+              </h2>
+              <p className="text-xl text-gray-600">
+                Join thousands who discovered the professional advantage
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+              {stats.map((stat, index) => (
+                <div key={index} className="text-center ultra-premium-card p-8 hover-lift">
+                  <div className="w-16 h-16 ultra-button rounded-full mx-auto mb-4 flex items-center justify-center pulse-ring">
+                    <stat.icon className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-4xl lg:text-6xl font-bold premium-gradient-text mb-2">
+                    <AnimatedCounter value={stat.value} prefix={stat.prefix} suffix={stat.suffix} />
+                  </div>
+                  <p className="text-gray-600 font-bold">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Scarcity Indicators */}
+            <ScarcityIndicators />
+            
+            {/* Social Proof Ticker */}
+            <SocialProofTicker />
+
+            {/* Industry Expertise */}
+            <div className="ultra-premium-card p-8 mt-8">
+              <h3 className="text-3xl font-bold text-center premium-gradient-text mb-8">
+                We Specialize in Your Industry
+              </h3>
+              <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-6">
+                {industries.map((industry, index) => (
+                  <div key={index} className="text-center group hover-lift">
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary to-purple-600 rounded-xl mx-auto mb-3 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                      <industry.icon className="h-8 w-8 text-white" />
+                    </div>
+                    <p className="font-bold text-gray-900 text-sm mb-1">{industry.name}</p>
+                    <p className="text-xs text-primary font-semibold">{industry.clients} clients</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Services Showcase */}
+        <ServicesShowcase />
+
+        {/* Ultra-Premium Process Section */}
+        <section className="py-24 bg-gradient-to-br from-primary/10 via-purple-50 to-blue-50 relative overflow-hidden">
+          <div className="absolute inset-0 particles opacity-30"></div>
+          
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="text-center mb-20">
+              <h2 className="text-5xl lg:text-7xl font-bold premium-gradient-text mb-8">
+                Your Tax Journey, Perfected
+              </h2>
+              <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                We've revolutionized tax preparation with AI-powered intelligence and human expertise
+              </p>
+            </div>
+
+            <div className="max-w-7xl mx-auto">
+              <div className="grid lg:grid-cols-3 gap-12 relative">
+                {/* Animated Connection Lines */}
+                <div className="hidden lg:block absolute top-8 left-1/6 right-1/6 h-1 bg-gradient-to-r from-primary via-purple-500 to-blue-500 rounded-full"></div>
+                
+                {[
+                  {
+                    step: "01",
+                    title: "AI-Powered Document Intelligence",
+                    description: "Our advanced AI instantly recognizes and categorizes your tax documents. Simply snap photos with our mobile app—we handle the rest with machine learning precision.",
+                    features: ["Instant OCR Recognition", "Smart Categorization", "Automatic Import from 500+ Sources"],
+                    color: "from-blue-500 to-cyan-500",
+                    icon: Camera
+                  },
+                  {
+                    step: "02", 
+                    title: "Expert Human + AI Review",
+                    description: "Certified CPAs work alongside our AI to review every detail, hunt for hidden deductions, and optimize your return using advanced tax strategies.",
+                    features: ["CPA Certification Required", "AI-Assisted Analysis", "Advanced Tax Strategies"],
+                    color: "from-purple-500 to-pink-500",
+                    icon: Bot
+                  },
+                  {
+                    step: "03",
+                    title: "Zap-Fast Processing & Tracking", 
+                    description: "We e-file instantly and provide real-time tracking. Most clients receive refunds 3-5x faster with our priority processing and direct deposit.",
+                    features: ["Instant E-filing", "Real-time Tracking", "Priority Processing"],
+                    color: "from-green-500 to-emerald-500", 
+                    icon: Zap
+                  }
+                ].map((step, index) => (
+                  <div key={index} className="text-center relative">
+                    <div className={`w-20 h-20 bg-gradient-to-br ${step.color} rounded-2xl mx-auto mb-8 flex items-center justify-center shadow-2xl pulse-ring z-10 relative`}>
+                      <step.icon className="h-10 w-10 text-white" />
+                    </div>
+                    
+                    <div className="ultra-premium-card text-center h-full">
+                      <div className="text-6xl font-bold premium-gradient-text mb-4">{step.step}</div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-4">{step.title}</h3>
+                      <p className="text-gray-700 mb-6 leading-relaxed">{step.description}</p>
+                      
+                      <div className="space-y-3">
+                        {step.features.map((feature, idx) => (
+                          <div key={idx} className="flex items-center gap-3 justify-center">
+                            <div className={`w-2 h-2 bg-gradient-to-r ${step.color} rounded-full`}></div>
+                            <span className="text-sm font-semibold text-gray-700">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="text-center mt-16">
+                <Link href="/auth/client/signin">
+                  <Button className="ultra-button text-2xl px-16 py-8 rounded-2xl font-bold neon-glow">
+                    <Sparkles className="mr-3 h-8 w-8" />
+                    Experience the Future of Tax Prep
+                    <Rocket className="ml-3 h-8 w-8" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Google Reviews Section */}
+        <GoogleReviewsSection />
+          
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="text-center mb-16">
+              <h2 className="text-5xl lg:text-7xl font-bold text-glow mb-8">
+                Life-Changing Results
+              </h2>
+              <p className="text-2xl text-white/80">
+                Real stories from real clients who discovered the professional difference
+              </p>
+            </div>
+
+            <div className="max-w-6xl mx-auto">
+              <div className="ultra-premium-card bg-white/10 backdrop-blur-xl border-white/20 p-12">
+                <div className="text-center space-y-8">
+                  <div className="flex justify-center mb-8">
+                    {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
+                      <Star key={i} className="h-8 w-8 text-yellow-400 fill-current floating" style={{animationDelay: `${i * 0.1}s`}} />
+                    ))}
+                  </div>
+                  
+                  <div className="space-y-6">
+                    <blockquote className="text-3xl lg:text-4xl text-white italic leading-relaxed font-light">
+                      "{testimonials[currentTestimonial].content}"
+                    </blockquote>
+                    
+                    <div className="inline-block">
+                      <div className="bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl p-6">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <TrendingUp className="h-6 w-6 text-white" />
+                          <span className="text-lg font-bold text-white">Professional Advantage</span>
+                        </div>
+                        <div className="text-5xl font-bold text-white">
+                          +${testimonials[currentTestimonial].refundIncrease.toLocaleString()}
+                        </div>
+                        <div className="text-sm text-green-100">more than previous tax software</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-center gap-6 pt-6">
+                      <div className="w-20 h-20 bg-gradient-to-br from-primary to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-2xl">
+                        {testimonials[currentTestimonial].avatar}
+                      </div>
+                      <div className="text-left">
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold text-white text-xl">{testimonials[currentTestimonial].name}</p>
+                          {testimonials[currentTestimonial].verified && (
+                            <BadgeCheck className="h-6 w-6 text-green-400" />
+                          )}
+                        </div>
+                        <p className="text-lg text-blue-300 font-semibold">{testimonials[currentTestimonial].role}</p>
+                        <p className="text-white/70 flex items-center gap-1">
+                          <MapPin className="h-4 w-4" />
+                          {testimonials[currentTestimonial].location}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-center gap-3 mt-8">
+                {testimonials.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentTestimonial(index)}
+                    className={`w-4 h-4 rounded-full transition-all duration-300 ${
+                      index === currentTestimonial ? 'bg-white w-12' : 'bg-white/30'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Ultra-Premium Final CTA */}
+        <section className="py-32 bg-gradient-to-br from-primary via-purple-600 to-pink-600 text-white relative overflow-hidden">
+          <div className="absolute inset-0 particles opacity-40"></div>
+          
+          <div className="container mx-auto px-4 text-center relative z-10">
+            <div className="max-w-6xl mx-auto space-y-12">
+              <div className="space-y-8">
+                <h2 className="text-6xl lg:text-9xl font-bold text-glow">
+                  Ready to Stop Overpaying?
+                </h2>
+                <p className="text-3xl lg:text-4xl font-light leading-relaxed">
+                  Join <strong>27,500+</strong> smart taxpayers who chose the professional advantage
+                </p>
+                <p className="text-xl lg:text-2xl opacity-90 max-w-4xl mx-auto">
+                  Every day you wait costs you money. Our AI-powered platform and certified experts 
+                  have secured over <strong className="text-yellow-300">$89 million</strong> in additional refunds 
+                  for clients just like you. Your maximum refund is three clicks away.
+                </p>
+              </div>
+              
+              <div className="space-y-8">
+                <div className="flex flex-col lg:flex-row gap-6 justify-center">
+                  <Link href="/auth/client/signin">
+                    <Button className="ultra-button text-3xl px-16 py-10 rounded-3xl font-bold neon-glow hover-lift">
+                      <Crown className="mr-4 h-10 w-10" />
+                      Claim My Maximum Refund Now
+                      <Zap className="ml-4 h-10 w-10" />
+                    </Button>
+                  </Link>
+                  <Button 
+                    onClick={() => setShowCalendarBooking(true)}
+                    variant="outline" 
+                    className="border-4 border-white text-white hover:bg-white hover:text-primary text-2xl px-16 py-10 rounded-3xl font-bold"
+                  >
+                    <Calendar className="mr-3 h-8 w-8" />
+                    Schedule FREE Consultation
+                  </Button>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
+                  <Button variant="ghost" className="text-white hover:text-yellow-300 hover:bg-white/10 text-xl px-8 py-4 rounded-2xl">
+                    <Phone className="mr-3 h-6 w-6" />
+                    {COMPANY_CONFIG.contact.phone}
+                  </Button>
+                  <div className="text-white/80">
+                    Available 7 days a week • Extended tax season hours
+                  </div>
+                </div>
+              </div>
+
+              {/* Ultimate Guarantees Grid */}
+              <div className="grid md:grid-cols-4 gap-8 mt-20 pt-12 border-t border-white/20">
+                {[
+                  { icon: Shield, title: "Military-Grade Security", subtitle: "Your data is safer than Fort Knox" },
+                  { icon: Crown, title: "Maximum Refund Promise", subtitle: "We find every penny you deserve" },
+                  { icon: Zap, title: "Zap Processing", subtitle: "Most returns done same day" },
+                  { icon: HeartHandshake, title: "White Glove Service", subtitle: "VIP treatment, every time" }
+                ].map((item, index) => (
+                  <div key={index} className="text-center hover-lift">
+                    <div className="w-20 h-20 morphism rounded-full mx-auto mb-6 flex items-center justify-center pulse-ring">
+                      <item.icon className="h-10 w-10 text-white" />
+                    </div>
+                    <div className="font-bold text-xl text-glow">{item.title}</div>
+                    <div className="text-white/70">{item.subtitle}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="text-center pt-8">
+                <p className="text-white/60">
+                  🏆 <strong>Winner:</strong> Best Tax Service 2024 • 🥇 <strong>Rated:</strong> #1 Customer Satisfaction • ⭐ <strong>Trusted by:</strong> 27,500+ clients
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* Strategic Overlay Components */}
+      <LiveChatWidget />
+      <ExitIntentPopup 
+        isVisible={showExitIntent} 
+        onClose={() => setShowExitIntent(false)} 
+      />
+      <CalendarBooking 
+        isOpen={showCalendarBooking} 
+        onClose={() => setShowCalendarBooking(false)} 
+      />
+    </MobileOptimizedLayout>
+  )
+}

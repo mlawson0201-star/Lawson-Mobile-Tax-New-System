@@ -1,0 +1,49 @@
+
+{
+  "name": "LMT - Lawson Mobile Tax",
+  "description": "Advanced tax preparation and business services platform",
+  "keywords": ["tax", "preparation", "business", "nextjs", "stripe"],
+  "website": "https://lawsonmobiletax.com",
+  "repository": "https://github.com/lawsonmobiletax/formality-tax",
+  "logo": "https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=100075727884782",
+  "success_url": "/",
+  "env": {
+    "NEXTAUTH_SECRET": {
+      "description": "Secret for NextAuth.js",
+      "generator": "secret"
+    },
+    "NEXTAUTH_URL": {
+      "description": "URL for NextAuth.js",
+      "value": "https://lawsonmobiletax.com"
+    },
+    "DATABASE_URL": {
+      "description": "PostgreSQL database URL"
+    },
+    "STRIPE_PUBLISHABLE_KEY": {
+      "description": "Stripe publishable key"
+    },
+    "STRIPE_SECRET_KEY": {
+      "description": "Stripe secret key"
+    },
+    "ABACUSAI_API_KEY": {
+      "description": "Abacus AI API key"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "standard-1x"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "stack": "heroku-22",
+  "addons": [
+    {
+      "plan": "heroku-postgresql:standard-0"
+    }
+  ]
+}
