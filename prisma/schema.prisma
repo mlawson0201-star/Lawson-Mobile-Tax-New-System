@@ -1,0 +1,748 @@
+// Formality Tax Service Bureau Platform Schema
+// Multi-tenant architecture with comprehensive CRM and tax workflow management
+
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/lawson-mobile-tax/app/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// Multi-tenant Service Bureau/Office structure
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique // For white-label domains
+  type        OrganizationType @default(PARTNER)
+  
+  // Service Bureau hierarchy
+  parentOrganizationId String?
+  parentOrganization   Organization? @relation("ServiceBureauOffices", fields: [parentOrganizationId], references: [id])
+  officeLocations      Organization[] @relation("ServiceBureauOffices")
+  
+  // White-label branding
+  logo        String?
+  primaryColor String   @default("#2563eb")
+  secondaryColor String @default("#64748b")
+  customDomain String?
+  
+  // Contact information
+  email       String
+  phone       String?
+  address     String?
+  city        String?
+  state         String?
+  zipCode     String?
+  
+  // Office-specific info
+  officeManager String?
+  ptinNumber    String? // Tax preparer identification
+  efsId         String? // Electronic filing system ID
+  
+  // Licensing & Billing
+  licenseLevel    LicenseLevel @default(BASIC)
+  monthlyFee      Float        @default(99.00)
+  perReturnFee    Float        @default(15.00)
+  revenueShare    Float        @default(0.20) // 20% to service bureau
+  
+  stripeCustomerId String?
+  subscriptionId   String?
+  subscriptionStatus String?
+  subscriptionPlan String @default("basic")
+  
+  // Configuration
+  isActive    Boolean  @default(true)
+  settings    Json     @default("{}")
+  
+  // Metrics
+  totalClients     Int @default(0)
+  totalReturns     Int @default(0)
+  monthlyRevenue   Float @default(0)
+  lifetimeRevenue  Float @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  users       User[]
+  clients     Client[]
+  leads       Lead[]
+  taxReturns  TaxReturn[]
+  documents   Document[]
+  campaigns   Campaign[]
+  payments    Payment[]
+  
+  @@map("organizations")
+}
+
+enum OrganizationType {
+  MASTER         // Formality Tax main company
+  PARTNER        // Reseller partners (keep for compatibility)
+  SERVICE_BUREAU // Main service bureau/franchise
+  OFFICE         // Individual office location
+  BRANCH         // Branch office
+}
+
+enum LicenseLevel {
+  BASIC     // Up to 100 returns/month
+  STANDARD  // Up to 500 returns/month  
+  PREMIUM   // Up to 1000 returns/month
+  UNLIMITED // Unlimited returns
+}
+
+// User management with role-based permissions
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  
+  // Additional fields
+  firstName     String?
+  lastName      String?
+  phone         String?
+  role          UserRole  @default(STAFF)
+  isActive      Boolean   @default(true)
+  
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  // Permissions
+  permissions   String[]  @default([])
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  
+  // Relations
+  assignedLeads Lead[]     @relation("LeadAssignee")
+  createdLeads  Lead[]     @relation("LeadCreator")
+  assignedTasks Task[]     @relation("TaskAssignee")
+  createdTasks  Task[]     @relation("TaskCreator")
+  taxReturns    TaxReturn[] @relation("TaxPreparer")
+  reviewedReturns TaxReturn[] @relation("TaxReviewer")
+  notes         Note[]
+  activities    Activity[]
+  appointments  Appointment[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  SUPER_ADMIN      // Platform admin (Formality Tax)
+  ADMIN            // Organization admin (keep for compatibility)
+  MANAGER          // Team manager (keep for compatibility)  
+  BUREAU_ADMIN     // Service bureau owner
+  OFFICE_ADMIN     // Office manager/owner
+  TAX_PREPARER     // Licensed tax preparer
+  STAFF            // Regular staff
+  CLIENT           // Client access
+}
+
+// CRM System - Lead Management
+model Lead {
+  id            String     @id @default(cuid())
+  
+  // Basic information
+  firstName     String
+  lastName      String
+  email         String
+  phone         String?
+  company       String?
+  
+  // Lead details
+  source        String?    // Where lead came from
+  status        LeadStatus @default(NEW)
+  priority      Priority   @default(MEDIUM)
+  
+  // CRM pipeline
+  stage         String     @default("initial_contact")
+  expectedValue Float?
+  probability   Int        @default(0) // 0-100%
+  
+  // Assignment
+  assigneeId    String?
+  assignee      User?      @relation("LeadAssignee", fields: [assigneeId], references: [id])
+  createdById   String
+  createdBy     User       @relation("LeadCreator", fields: [createdById], references: [id])
+  
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  // Timestamps
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  contactedAt   DateTime?
+  convertedAt   DateTime?
+  
+  // Relations
+  client        Client?    @relation("LeadConversion")
+  tasks         Task[]
+  notes         Note[]
+  activities    Activity[]
+  
+  // Custom fields for tax-specific data
+  customFields  Json       @default("{}")
+  
+  @@map("leads")
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL_SENT
+  NEGOTIATION
+  WON
+  LOST
+  NURTURING
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// Client Management
+model Client {
+  id            String     @id @default(cuid())
+  
+  // Personal information
+  firstName     String
+  lastName      String
+  email         String
+  phone         String?
+  dateOfBirth   DateTime?
+  ssn           String?    // Encrypted
+  
+  // Address
+  address       String?
+  city          String?
+  state         String?
+  zipCode       String?
+  
+  // Business information
+  company       String?
+  businessType  String?
+  ein           String?    // Encrypted
+  
+  // Client status
+  status        ClientStatus @default(ACTIVE)
+  clientType    ClientType   @default(INDIVIDUAL)
+  
+  // Sub-account functionality
+  parentClientId String?
+  parentClient   Client?    @relation("ClientSubAccounts", fields: [parentClientId], references: [id])
+  subAccounts    Client[]   @relation("ClientSubAccounts")
+  accountType    AccountType @default(MAIN)
+  
+  // Relationship
+  leadId        String?    @unique
+  lead          Lead?      @relation("LeadConversion", fields: [leadId], references: [id])
+  
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  
+  // Relations
+  taxReturns    TaxReturn[]
+  documents     Document[]
+  appointments  Appointment[]
+  notes         Note[]
+  activities    Activity[]
+  payments      Payment[]
+  
+  // Custom fields
+  customFields  Json       @default("{}")
+  
+  @@map("clients")
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum ClientType {
+  INDIVIDUAL
+  BUSINESS
+  NONPROFIT
+}
+
+enum AccountType {
+  MAIN
+  SUB
+}
+
+// Tax Return Workflow Management  
+model TaxReturn {
+  id            String         @id @default(cuid())
+  
+  // Basic information
+  taxYear       Int
+  returnType    TaxReturnType
+  status        TaxReturnStatus @default(DRAFT)
+  
+  // Client information
+  clientId      String
+  client        Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  // Assignment
+  preparerId    String?
+  preparer      User?          @relation("TaxPreparer", fields: [preparerId], references: [id])
+  
+  // Financial information
+  totalIncome   Float?
+  totalDeductions Float?
+  taxOwed       Float?
+  refundAmount  Float?
+  federalWithheld Float?
+  stateWithheld Float?
+  
+  // Pricing & Revenue
+  preparationFee Float        @default(0)
+  serviceFee     Float        @default(0) 
+  totalFee       Float        @default(0)
+  paidAmount     Float        @default(0)
+  
+  // IRS Integration
+  irsAckNumber   String?      // IRS acknowledgment number
+  irsStatus      String?      // Accepted, Rejected, etc.
+  eFileDate      DateTime?
+  irsResponse    Json         @default("{}")
+  
+  // Processing dates
+  startedAt     DateTime?
+  completedAt   DateTime?
+  signedAt      DateTime?     // Client signature date
+  filedAt       DateTime?
+  dueDateAt     DateTime
+  extensionDate DateTime?
+  
+  // Quality Control
+  reviewerId    String?
+  reviewer      User?        @relation("TaxReviewer", fields: [reviewerId], references: [id])
+  reviewedAt    DateTime?
+  qualityScore  Float?       // 0-100 quality rating
+  
+  // Multi-tenant
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  // Relations
+  documents     Document[]
+  tasks         Task[]
+  notes         Note[]
+  activities    Activity[]
+  payments      Payment[]
+  
+  // AI Analysis
+  aiAnalysis    Json          @default("{}")
+  riskScore     Float?        // 0-1 scale
+  
+  @@map("tax_returns")
+}
+
+enum TaxReturnType {
+  INDIVIDUAL_1040
+  BUSINESS_1120
+  PARTNERSHIP_1065
+  S_CORP_1120S
+  NONPROFIT_990
+  ESTATE_1041
+}
+
+enum TaxReturnStatus {
+  DRAFT
+  IN_PROGRESS
+  UNDER_REVIEW
+  READY_FOR_SIGNATURE
+  SIGNED
+  FILED
+  ACCEPTED
+  REJECTED
+  AMENDED
+}
+
+// Payment and Billing System
+model Payment {
+  id            String        @id @default(cuid())
+  
+  // Payment details
+  amount        Float
+  currency      String        @default("USD")
+  paymentMethod PaymentMethod @default(CREDIT_CARD)
+  status        PaymentStatus @default(PENDING)
+  
+  // External payment processor
+  stripePaymentIntentId String?
+  stripeChargeId        String?
+  processorFee          Float?  @default(0)
+  netAmount             Float?
+  
+  // Relationships
+  taxReturnId   String?
+  taxReturn     TaxReturn?    @relation(fields: [taxReturnId], references: [id])
+  
+  clientId      String?
+  client        Client?       @relation(fields: [clientId], references: [id])
+  
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  
+  // Payment metadata
+  description   String?
+  receiptUrl    String?
+  refundedAmount Float?       @default(0)
+  refundReason  String?
+  
+  // Revenue sharing
+  serviceBureauFee Float?     @default(0) // Fee to parent service bureau
+  officeFee        Float?     @default(0) // Fee kept by office
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  @@map("payments")
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  BANK_TRANSFER
+  CHECK
+  CASH
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+// Document Management System
+model Document {
+  id            String       @id @default(cuid())
+  
+  // File information
+  filename      String
+  originalName  String
+  mimeType      String
+  fileSize      Int
+  fileUrl       String
+  
+  // Document details
+  documentType  DocumentType
+  category      String?
+  description   String?
+  
+  // Relationships
+  clientId      String?
+  client        Client?      @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  
+  taxReturnId   String?
+  taxReturn     TaxReturn?   @relation(fields: [taxReturnId], references: [id], onDelete: SetNull)
+  
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  // Processing
+  isProcessed   Boolean      @default(false)
+  extractedData Json         @default("{}")
+  
+  // Security
+  isEncrypted   Boolean      @default(false)
+  accessLevel   String       @default("internal")
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  @@map("documents")
+}
+
+enum DocumentType {
+  W2
+  W9
+  TAX_RETURN
+  RECEIPT
+  INVOICE
+  BANK_STATEMENT
+  ID_DOCUMENT
+  CONTRACT
+  OTHER
+}
+
+// Task Management and Workflow
+model Task {
+  id            String     @id @default(cuid())
+  
+  title         String
+  description   String?
+  status        TaskStatus @default(TODO)
+  priority      Priority   @default(MEDIUM)
+  
+  // Assignment
+  assigneeId    String?
+  assignee      User?      @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  createdById   String
+  createdBy     User       @relation("TaskCreator", fields: [createdById], references: [id])
+  
+  // Relationships
+  leadId        String?
+  lead          Lead?      @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  
+  taxReturnId   String?
+  taxReturn     TaxReturn? @relation(fields: [taxReturnId], references: [id], onDelete: SetNull)
+  
+  // Scheduling
+  dueDate       DateTime?
+  completedAt   DateTime?
+  
+  // Multi-tenant
+  organizationId String
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  
+  @@map("tasks")
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+// Appointment Scheduling
+model Appointment {
+  id            String            @id @default(cuid())
+  
+  title         String
+  description   String?
+  type          AppointmentType   @default(CONSULTATION)
+  status        AppointmentStatus @default(SCHEDULED)
+  
+  // Timing
+  startTime     DateTime
+  endTime       DateTime
+  timezone      String            @default("UTC")
+  
+  // Participants
+  clientId      String?
+  client        Client?           @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  
+  staffId       String?
+  staff         User?             @relation(fields: [staffId], references: [id])
+  
+  // Meeting details
+  location      String?
+  meetingUrl    String?
+  notes         String?
+  
+  // Multi-tenant
+  organizationId String
+  
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  
+  @@map("appointments")
+}
+
+enum AppointmentType {
+  CONSULTATION
+  DOCUMENT_REVIEW
+  TAX_PREPARATION
+  FOLLOW_UP
+  SIGNING
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+// Communication Campaigns
+model Campaign {
+  id            String         @id @default(cuid())
+  
+  name          String
+  description   String?
+  type          CampaignType
+  status        CampaignStatus @default(DRAFT)
+  
+  // Content
+  subject       String?
+  content       String
+  
+  // Scheduling
+  scheduledAt   DateTime?
+  sentAt        DateTime?
+  
+  // Multi-tenant
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  // Relations
+  recipients    CampaignRecipient[]
+  
+  @@map("campaigns")
+}
+
+enum CampaignType {
+  EMAIL
+  SMS
+  AUTOMATED_SEQUENCE
+  NEWSLETTER
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  PAUSED
+}
+
+model CampaignRecipient {
+  id           String    @id @default(cuid())
+  
+  campaignId   String
+  campaign     Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  
+  email        String
+  phone        String?
+  firstName    String?
+  lastName     String?
+  
+  status       String    @default("pending") // pending, sent, delivered, opened, clicked, failed
+  sentAt       DateTime?
+  deliveredAt  DateTime?
+  openedAt     DateTime?
+  clickedAt    DateTime?
+  
+  @@map("campaign_recipients")
+}
+
+// Notes and Activities
+model Note {
+  id            String     @id @default(cuid())
+  
+  content       String
+  type          String     @default("general")
+  isPrivate     Boolean    @default(false)
+  
+  // Relationships
+  leadId        String?
+  lead          Lead?      @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  
+  clientId      String?
+  client        Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  
+  taxReturnId   String?
+  taxReturn     TaxReturn? @relation(fields: [taxReturnId], references: [id], onDelete: SetNull)
+  
+  // Author
+  authorId      String
+  author        User       @relation(fields: [authorId], references: [id])
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  
+  @@map("notes")
+}
+
+model Activity {
+  id            String     @id @default(cuid())
+  
+  type          String     // call, email, meeting, task_completed, etc.
+  description   String
+  metadata      Json       @default("{}")
+  
+  // Relationships
+  leadId        String?
+  lead          Lead?      @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  
+  clientId      String?
+  client        Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  
+  taxReturnId   String?
+  taxReturn     TaxReturn? @relation(fields: [taxReturnId], references: [id], onDelete: SetNull)
+  
+  // Actor
+  userId        String
+  user          User       @relation(fields: [userId], references: [id])
+  
+  createdAt     DateTime   @default(now())
+  
+  @@map("activities")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
