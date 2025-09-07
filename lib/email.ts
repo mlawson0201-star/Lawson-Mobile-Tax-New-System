@@ -1,7 +1,14 @@
 
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+let resend: Resend | null = null
+
+function getResendClient() {
+  if (!resend && process.env.RESEND_API_KEY) {
+    resend = new Resend(process.env.RESEND_API_KEY)
+  }
+  return resend
+}
 
 export interface EmailOptions {
   to: string | string[]
@@ -20,7 +27,12 @@ export async function sendEmail(options: EmailOptions) {
       throw new Error('Resend API key not configured. Please add real RESEND_API_KEY to .env file.')
     }
 
-    const result = await resend.emails.send({
+    const resendClient = getResendClient()
+    if (!resendClient) {
+      throw new Error('Failed to initialize Resend client')
+    }
+
+    const result = await resendClient.emails.send({
       from: options.from || 'noreply@lawsonmobiletax.com',
       to: options.to,
       subject: options.subject,
