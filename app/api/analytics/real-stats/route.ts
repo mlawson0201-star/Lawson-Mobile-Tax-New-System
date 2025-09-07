@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       activeReturns: activeReturns || 0,
       documentsProcessed: documentsCount || 0,
       averageRevenue: totalPayments > 0 ? (totalRevenue._sum.amount || 0) / totalPayments : 0,
-      recentActivity: recentPayments.map(payment => ({
+      recentActivity: recentPayments.map((payment: any) => ({
         id: payment.id,
         type: 'payment',
         client: payment.client ? `${payment.client.firstName} ${payment.client.lastName}` : 'Anonymous',

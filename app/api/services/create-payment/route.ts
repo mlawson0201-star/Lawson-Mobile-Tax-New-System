@@ -2,9 +2,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-08-27.basil',
-})
+let stripe: Stripe | null = null
+
+function getStripeClient() {
+  if (!stripe && process.env.STRIPE_SECRET_KEY) {
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-08-27.basil',
+    })
+  }
+  return stripe
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,8 +22,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    const stripeClient = getStripeClient()
+    if (!stripeClient) {
+      return NextResponse.json({ error: 'Payment processing not configured' }, { status: 500 })
+    }
+
     // Create Stripe checkout session for ANY service
-    const session = await stripe.checkout.sessions.create({
+    const session = await stripeClient.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {

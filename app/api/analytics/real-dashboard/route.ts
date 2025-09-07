@@ -198,7 +198,7 @@ export async function GET(request: NextRequest) {
         activeStaff,
         revenueGrowth: Math.round(revenueGrowth * 100) / 100
       },
-      recentPayments: recentPayments.map(payment => ({
+      recentPayments: recentPayments.map((payment: any) => ({
         id: payment.id,
         amount: payment.amount,
         client: payment.client ? `${payment.client.firstName} ${payment.client.lastName}` : 'Unknown',
@@ -206,12 +206,12 @@ export async function GET(request: NextRequest) {
         date: payment.createdAt,
         status: payment.status
       })),
-      topPreparers: topPreparers.map(preparer => ({
+      topPreparers: topPreparers.map((preparer: any) => ({
         id: preparer.id,
         name: `${preparer.firstName} ${preparer.lastName}`,
         completedReturns: preparer._count.taxReturns
       })),
-      officeMetrics: officeMetrics?.map(office => ({
+      officeMetrics: officeMetrics?.map((office: any) => ({
         ...office,
         performance: office.lifetimeRevenue > 10000 ? 'excellent' : 
                     office.lifetimeRevenue > 5000 ? 'good' : 
