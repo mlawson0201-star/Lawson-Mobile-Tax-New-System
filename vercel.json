@@ -1,20 +1,80 @@
 {
   "version": 2,
-  "framework": "nextjs",
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "installCommand": "npm install --legacy-peer-deps",
-  "devCommand": "npm run dev",
+  "name": "lawson-mobile-tax-comprehensive-system",
+  "alias": ["lawsonmobiletax.com", "www.lawsonmobiletax.com"],
+  "build": {
+    "env": {
+      "NEXTAUTH_SECRET": "lawson-mobile-tax-production-secret-key-2025-comprehensive-system",
+      "NEXTAUTH_URL": "https://lawsonmobiletax.com",
+      "DATABASE_URL": "postgresql://lawson_user:lawson_secure_pass_2025@localhost:5432/lawson_mobile_tax_comprehensive_db",
+      "STRIPE_SECRET_KEY": "sk_live_51234567890abcdef_production_key_lawson_mobile_tax",
+      "STRIPE_PUBLISHABLE_KEY": "pk_live_51234567890abcdef_production_key_lawson_mobile_tax",
+      "STRIPE_WEBHOOK_SECRET": "whsec_production_webhook_secret_lawson_mobile_tax",
+      "OPENAI_API_KEY": "sk-proj-production-openai-key-for-melika-ai-comprehensive-system",
+      "RESEND_API_KEY": "re_production_key_for_lawson_mobile_tax_comprehensive",
+      "AWS_ACCESS_KEY_ID": "AKIA_PRODUCTION_ACCESS_KEY_LAWSON",
+      "AWS_SECRET_ACCESS_KEY": "production_secret_access_key_lawson_mobile_tax",
+      "AWS_REGION": "us-east-1",
+      "AWS_S3_BUCKET": "lawson-mobile-tax-documents-production",
+      "MELIKA_AI_ENABLED": "true",
+      "CRM_ENABLED": "true",
+      "PAYMENT_PROCESSING_ENABLED": "true",
+      "TRAINING_MODULES_ENABLED": "true",
+      "ANALYTICS_ENABLED": "true",
+      "PHASE_1_FEATURES_ENABLED": "true",
+      "PHASE_2_FEATURES_ENABLED": "true",
+      "GOHIGHLEVEL_ENABLED": "true",
+      "AUTOMATION_ENABLED": "true",
+      "REAL_TIME_PROCESSING_ENABLED": "true",
+      "GOHIGHLEVEL_API_KEY": "production_ghl_api_key_lawson_mobile_tax",
+      "GOHIGHLEVEL_LOCATION_ID": "production_location_id_lawson",
+      "GOHIGHLEVEL_WEBHOOK_SECRET": "production_webhook_secret_ghl_lawson",
+      "NODE_ENV": "production",
+      "VERCEL_ENV": "production",
+      "ENABLE_BANK_PRODUCTS": "true",
+      "ENABLE_AUDIT_DEFENSE": "true",
+      "ENABLE_WHITE_LABEL": "true",
+      "ENABLE_AUTOMATION": "true"
+    }
+  },
+  "env": {
+    "NEXTAUTH_SECRET": "lawson-mobile-tax-production-secret-key-2025-comprehensive-system",
+    "NEXTAUTH_URL": "https://lawsonmobiletax.com",
+    "DATABASE_URL": "postgresql://lawson_user:lawson_secure_pass_2025@localhost:5432/lawson_mobile_tax_comprehensive_db",
+    "STRIPE_SECRET_KEY": "sk_live_51234567890abcdef_production_key_lawson_mobile_tax",
+    "STRIPE_PUBLISHABLE_KEY": "pk_live_51234567890abcdef_production_key_lawson_mobile_tax",
+    "STRIPE_WEBHOOK_SECRET": "whsec_production_webhook_secret_lawson_mobile_tax",
+    "OPENAI_API_KEY": "sk-proj-production-openai-key-for-melika-ai-comprehensive-system",
+    "RESEND_API_KEY": "re_production_key_for_lawson_mobile_tax_comprehensive",
+    "AWS_ACCESS_KEY_ID": "AKIA_PRODUCTION_ACCESS_KEY_LAWSON",
+    "AWS_SECRET_ACCESS_KEY": "production_secret_access_key_lawson_mobile_tax",
+    "AWS_REGION": "us-east-1",
+    "AWS_S3_BUCKET": "lawson-mobile-tax-documents-production",
+    "MELIKA_AI_ENABLED": "true",
+    "CRM_ENABLED": "true",
+    "PAYMENT_PROCESSING_ENABLED": "true",
+    "TRAINING_MODULES_ENABLED": "true",
+    "ANALYTICS_ENABLED": "true",
+    "PHASE_1_FEATURES_ENABLED": "true",
+    "PHASE_2_FEATURES_ENABLED": "true",
+    "GOHIGHLEVEL_ENABLED": "true",
+    "AUTOMATION_ENABLED": "true",
+    "REAL_TIME_PROCESSING_ENABLED": "true",
+    "GOHIGHLEVEL_API_KEY": "production_ghl_api_key_lawson_mobile_tax",
+    "GOHIGHLEVEL_LOCATION_ID": "production_location_id_lawson",
+    "GOHIGHLEVEL_WEBHOOK_SECRET": "production_webhook_secret_ghl_lawson",
+    "NODE_ENV": "production",
+    "VERCEL_ENV": "production",
+    "ENABLE_BANK_PRODUCTS": "true",
+    "ENABLE_AUDIT_DEFENSE": "true",
+    "ENABLE_WHITE_LABEL": "true",
+    "ENABLE_AUTOMATION": "true"
+  },
   "functions": {
-    "app/api/**/*.js": {
+    "app/api/**/*.ts": {
       "maxDuration": 30
     }
   },
   "regions": ["iad1"],
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/"
-    }
-  ]
+  "framework": "nextjs"
 }
